@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: chat-service
-          image: "{{ .Values.chatService.image.repository }}:{{ .Values.chatService.image.tag }}"
+          image: "{{ .Values.registry }}/{{ .Values.chatService.image.repository }}:{{ .Values.chatService.image.tag }}"
           imagePullPolicy: {{ .Values.chatService.image.pullPolicy }}
           ports:
             - containerPort: {{ .Values.chatService.service.port }}
