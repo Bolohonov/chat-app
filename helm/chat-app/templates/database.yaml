@@ -1,0 +1,118 @@
+---
+# PostgreSQL
+{{- if .Values.postgresql.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "chat-app.fullname" . }}-postgres-pvc
+  namespace: {{ .Release.Namespace }}
+spec:
+  accessModes: [ReadWriteOnce]
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "chat-app.fullname" . }}-postgresql
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ include "chat-app.fullname" . }}-postgresql
+  template:
+    metadata:
+      labels:
+        app: {{ include "chat-app.fullname" . }}-postgresql
+    spec:
+      containers:
+        - name: postgresql
+          image: postgres:16-alpine
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_DB
+              value: {{ .Values.postgresql.database | quote }}
+            - name: POSTGRES_USER
+              value: chat
+            - name: {{ .Values.postgresql.username | quote }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "chat-app.fullname" . }}-secrets
+                  key: db-password
+          volumeMounts:
+            - name: pgdata
+              mountPath: /var/lib/postgresql/data
+          readinessProbe:
+            exec:
+              command: ["sh", "-c", "redis-cli -a $REDIS_PASSWORD ping"]
+            initialDelaySeconds: 10
+            periodSeconds: 5
+      volumes:
+        - name: pgdata
+          persistentVolumeClaim:
+            claimName: {{ include "chat-app.fullname" . }}-postgres-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "chat-app.fullname" . }}-postgresql
+spec:
+  selector:
+    app: {{ include "chat-app.fullname" . }}-postgresql
+  ports:
+    - port: 5432
+      targetPort: 5432
+{{- end }}
+---
+# Redis
+{{- if .Values.redis.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "chat-app.fullname" . }}-redis
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ include "chat-app.fullname" . }}-redis
+  template:
+    metadata:
+      labels:
+        app: {{ include "chat-app.fullname" . }}-redis
+    spec:
+      containers:
+        - name: redis
+          image: redis:7-alpine
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 6379
+          command:
+            - redis-server
+            - --requirepass
+            - $(REDIS_PASSWORD)
+          env:
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "chat-app.fullname" . }}-secrets
+                  key: redis-password
+          readinessProbe:
+            exec:
+              command: ["redis-cli", "-a", "$(REDIS_PASSWORD)", "ping"]
+            initialDelaySeconds: 5
+            periodSeconds: 5
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "chat-app.fullname" . }}-redis-master
+spec:
+  selector:
+    app: {{ include "chat-app.fullname" . }}-redis
+  ports:
+    - port: 6379
+      targetPort: 6379
+{{- end }}

@@ -9,7 +9,12 @@ import (
 )
 
 func main() {
-	hub := NewHub()
+	chatServiceURL := os.Getenv("CHAT_SERVICE_URL")
+	if chatServiceURL == "" {
+		chatServiceURL = "http://localhost:8081"
+	}
+
+	hub := NewHub(NewChatClient(chatServiceURL))
 	go hub.Run()
 
 	r := mux.NewRouter()

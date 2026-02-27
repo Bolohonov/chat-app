@@ -2,20 +2,20 @@
   <div class="input-area">
     <div class="input-wrap">
       <textarea
-        ref="inputEl"
-        v-model="text"
-        class="msg-input"
-        :placeholder="`message ${rooms.activeRoom?.name || ''}`"
-        rows="1"
-        @keydown.enter.exact.prevent="send"
-        @keydown="onKeydown"
-        @input="autoResize"
+          ref="inputEl"
+          v-model="text"
+          class="msg-input"
+          :placeholder="`message ${rooms.activeRoom?.name || ''}`"
+          rows="1"
+          @keydown.enter.exact.prevent="send"
+          @keydown="onKeydown"
+          @input="autoResize"
       ></textarea>
       <button
-        class="send-btn"
-        :class="{ active: text.trim().length > 0 }"
-        @click="send"
-        :disabled="!text.trim()"
+          class="send-btn"
+          :class="{ active: text.trim().length > 0 }"
+          @click="send"
+          :disabled="!text.trim()"
       >
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
           <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>

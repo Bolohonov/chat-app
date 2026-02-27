@@ -42,5 +42,5 @@ export const useRoomsStore = defineStore('rooms', () => {
   }
 
   return { rooms, activeRoom, messages, loading,
-           fetchRooms, createRoom, selectRoom, pushMessage, updateRoomLastMessage }
+    fetchRooms, createRoom, selectRoom, pushMessage, updateRoomLastMessage }
 })

@@ -16,9 +16,9 @@
         </div>
 
         <div
-          v-for="(msg, idx) in group.messages"
-          :key="msg.id"
-          :class="['msg-row', { 'mine': msg.senderId === auth.userId, 'consecutive': isConsecutive(group.messages, idx) }]"
+            v-for="(msg, idx) in group.messages"
+            :key="msg.id"
+            :class="['msg-row', { 'mine': msg.senderId === auth.userId, 'consecutive': isConsecutive(group.messages, idx) }]"
         >
           <div v-if="!isConsecutive(group.messages, idx) && msg.senderId !== auth.userId" class="msg-avatar">
             {{ (msg.senderName || msg.senderId).slice(0,2).toUpperCase() }}
@@ -89,7 +89,7 @@ function isConsecutive(msgs, idx) {
   if (idx === 0) return false
   const prev = msgs[idx - 1], cur = msgs[idx]
   return prev.senderId === cur.senderId &&
-    new Date(cur.createdAt) - new Date(prev.createdAt) < 120_000
+      new Date(cur.createdAt) - new Date(prev.createdAt) < 120_000
 }
 
 const typingLabel = computed(() => {

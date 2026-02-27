@@ -23,6 +23,13 @@ spec:
           env:
             - name: PORT
               value: "{{ .Values.gateway.service.port }}"
+            - name: CHAT_SERVICE_URL
+              value: "http://{{ include "chat-app.fullname" . }}-service:{{ .Values.chatService.service.port }}"
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "chat-app.fullname" . }}-secrets
+                  key: jwt-secret
           resources:
             {{- toYaml .Values.gateway.resources | nindent 12 }}
           livenessProbe:

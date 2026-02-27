@@ -100,8 +100,8 @@ async function submit() {
   position: absolute;
   inset: 0;
   background-image:
-    linear-gradient(rgba(0,255,135,0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0,255,135,0.03) 1px, transparent 1px);
+      linear-gradient(rgba(0,255,135,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,255,135,0.03) 1px, transparent 1px);
   background-size: 48px 48px;
   mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, black, transparent);
 }

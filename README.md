@@ -156,7 +156,7 @@ helm dependency update ./chat-app
 helm upgrade --install chat ./chat-app \
   --namespace chat \
   --create-namespace \
-  --values ./chat-app/values.yaml
+  --values ./chat-app/values.prod.yaml
 ```
 
 ### Проверить

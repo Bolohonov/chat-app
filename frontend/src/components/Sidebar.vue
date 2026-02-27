@@ -38,10 +38,10 @@
         <span>no rooms yet</span>
       </div>
       <button
-        v-for="room in filteredRooms"
-        :key="room.id"
-        :class="['room-item', { active: rooms.activeRoom?.id === room.id }]"
-        @click="selectRoom(room)"
+          v-for="room in filteredRooms"
+          :key="room.id"
+          :class="['room-item', { active: rooms.activeRoom?.id === room.id }]"
+          @click="selectRoom(room)"
       >
         <div class="room-icon">
           {{ room.type === 'DIRECT' ? '◈' : '⊞' }}
@@ -66,10 +66,10 @@
           <input v-model="newRoom.description" class="modal-input" placeholder="description (optional)" maxlength="200" />
           <div class="modal-type-row">
             <button
-              v-for="t in ['GROUP','DIRECT']"
-              :key="t"
-              :class="['type-btn', { active: newRoom.type === t }]"
-              @click="newRoom.type = t"
+                v-for="t in ['GROUP','DIRECT']"
+                :key="t"
+                :class="['type-btn', { active: newRoom.type === t }]"
+                @click="newRoom.type = t"
             >{{ t.toLowerCase() }}</button>
           </div>
           <div class="modal-actions">
@@ -99,11 +99,11 @@ const showNewRoom = ref(false)
 const newRoom     = ref({ name: '', description: '', type: 'GROUP' })
 
 const initials = computed(() =>
-  (authS.displayName || authS.username || '?').slice(0,2).toUpperCase()
+    (authS.displayName || authS.username || '?').slice(0,2).toUpperCase()
 )
 
 const filteredRooms = computed(() =>
-  rooms.rooms.filter(r => r.name.toLowerCase().includes(search.value.toLowerCase()))
+    rooms.rooms.filter(r => r.name.toLowerCase().includes(search.value.toLowerCase()))
 )
 
 onMounted(async () => {

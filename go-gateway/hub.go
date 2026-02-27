@@ -13,21 +13,24 @@ type Hub struct {
 	register   chan *Client
 	unregister chan *Client
 	mu         sync.RWMutex
+	chatClient *ChatClient
 }
 
 type Message struct {
 	RoomID  string `json:"roomId"`
 	UserID  string `json:"userId"`
 	Content string `json:"content"`
-	Type    string `json:"type"` // "message", "join", "leave", "typing"
+	Type    string `json:"type"`
+	Token   string `json:"-"` // не сериализуется наружу
 }
 
-func NewHub() *Hub {
+func NewHub(chatClient *ChatClient) *Hub {
 	return &Hub{
 		rooms:      make(map[string]map[*Client]bool),
 		broadcast:  make(chan *Message, 256),
 		register:   make(chan *Client),
 		unregister: make(chan *Client),
+		chatClient: chatClient,
 	}
 }
 
@@ -42,7 +45,6 @@ func (h *Hub) Run() {
 			h.rooms[client.roomID][client] = true
 			h.mu.Unlock()
 
-			// Notify room about new user
 			h.broadcast <- &Message{
 				RoomID:  client.roomID,
 				UserID:  client.userID,
@@ -73,6 +75,15 @@ func (h *Hub) Run() {
 			log.Printf("Client %s left room %s", client.userID, client.roomID)
 
 		case msg := <-h.broadcast:
+			// Сохраняем в chat-service только обычные сообщения
+			if msg.Type == "message" {
+				go func(m *Message) {
+					if err := h.chatClient.SaveMessage(m); err != nil {
+						log.Printf("Failed to save message from %s: %v", m.UserID, err)
+					}
+				}(msg)
+			}
+
 			h.mu.RLock()
 			clients := h.rooms[msg.RoomID]
 			data, _ := json.Marshal(msg)

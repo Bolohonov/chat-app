@@ -26,12 +26,7 @@ spec:
             - name: GATEWAY_HOST
               value: "{{ include "chat-app.fullname" . }}-gateway:{{ .Values.gateway.service.port }}"
           resources:
-            requests:
-              cpu: 20m
-              memory: 32Mi
-            limits:
-              cpu: 100m
-              memory: 64Mi
+            {{- toYaml .Values.frontend.resources | nindent 12 }}
           livenessProbe:
             httpGet:
               path: /

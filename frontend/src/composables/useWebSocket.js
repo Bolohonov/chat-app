@@ -17,7 +17,7 @@ export function useWebSocket() {
     currentRoomId = roomId
 
     const proto = location.protocol === 'https:' ? 'wss' : 'ws'
-    const url = `${proto}://${location.host}/ws/${roomId}?userId=${auth.userId}`
+    const url = `${proto}://${location.host}/ws/${roomId}?token=${auth.token}`
     ws = new WebSocket(url)
 
     ws.onopen = () => { connected.value = true }

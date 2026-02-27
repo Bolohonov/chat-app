@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -31,6 +32,7 @@ type Client struct {
 	send   chan []byte
 	roomID string
 	userID string
+	token  string // JWT токен для вызовов chat-service
 }
 
 // readPump pumps messages from WebSocket to Hub
@@ -64,6 +66,7 @@ func (c *Client) readPump() {
 
 		msg.RoomID = c.roomID
 		msg.UserID = c.userID
+		msg.Token = c.token // пробрасываем токен для сохранения в chat-service
 		if msg.Type == "" {
 			msg.Type = "message"
 		}
@@ -114,10 +117,15 @@ func (c *Client) writePump() {
 }
 
 func ServeWs(hub *Hub, w http.ResponseWriter, r *http.Request, roomID string) {
-	// Extract userID from JWT token (simplified - in prod use proper JWT validation)
-	userID := r.URL.Query().Get("userId")
-	if userID == "" {
-		http.Error(w, "userId required", http.StatusBadRequest)
+	tokenStr := r.URL.Query().Get("token")
+	if tokenStr == "" {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	userID, err := validateJWT(tokenStr, os.Getenv("JWT_SECRET"))
+	if err != nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
 
@@ -133,6 +141,7 @@ func ServeWs(hub *Hub, w http.ResponseWriter, r *http.Request, roomID string) {
 		send:   make(chan []byte, 256),
 		roomID: roomID,
 		userID: userID,
+		token:  tokenStr, // сохраняем токен
 	}
 
 	hub.register <- client
