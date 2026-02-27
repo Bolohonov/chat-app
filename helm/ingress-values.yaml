@@ -1,0 +1,4 @@
+controller:
+  allowSnippetAnnotations: true
+  config:
+    annotations-risk-level: "Critical"

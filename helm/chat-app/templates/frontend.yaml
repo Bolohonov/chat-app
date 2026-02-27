@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "chat-app.fullname" . }}-frontend
+  labels:
+    app: {{ include "chat-app.fullname" . }}-frontend
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ include "chat-app.fullname" . }}-frontend
+  template:
+    metadata:
+      labels:
+        app: {{ include "chat-app.fullname" . }}-frontend
+    spec:
+      containers:
+        - name: frontend
+          image: "{{ .Values.frontend.image.repository }}:{{ .Values.frontend.image.tag }}"
+          imagePullPolicy: {{ .Values.frontend.image.pullPolicy }}
+          ports:
+            - containerPort: 80
+          env:
+            - name: CHAT_SERVICE_HOST
+              value: "{{ include "chat-app.fullname" . }}-service:{{ .Values.chatService.service.port }}"
+            - name: GATEWAY_HOST
+              value: "{{ include "chat-app.fullname" . }}-gateway:{{ .Values.gateway.service.port }}"
+          resources:
+            requests:
+              cpu: 20m
+              memory: 32Mi
+            limits:
+              cpu: 100m
+              memory: 64Mi
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 30
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "chat-app.fullname" . }}-frontend
+spec:
+  selector:
+    app: {{ include "chat-app.fullname" . }}-frontend
+  ports:
+    - port: 80
+      targetPort: 80

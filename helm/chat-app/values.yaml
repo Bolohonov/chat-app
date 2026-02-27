@@ -1,0 +1,88 @@
+replicaCount: 1
+
+frontend:
+  image:
+    repository: docker-frontend
+    tag: fixed
+    pullPolicy: Always
+
+gateway:
+  image:
+    repository: chat-gateway
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    port: 8080
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 128Mi
+
+chatService:
+  image:
+    repository: chat-service
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    port: 8081
+  resources:
+    requests:
+      cpu: 200m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  env:
+    JWT_SECRET: "change-me-in-production-use-secret-manager"
+    JWT_EXPIRATION_MS: "86400000"
+
+ingress:
+  enabled: true
+  className: nginx
+  host: chat.local
+  tls:
+    enabled: false
+    secretName: chat-tls
+
+postgresql:
+  enabled: true
+  image:
+    registry: docker.io
+    repository: postgres
+    tag: 16-alpine
+    pullPolicy: IfNotPresent
+    primary:
+      podSecurityContext:
+        fsGroup: 1000
+      containerSecurityContext:
+        runAsUser: 1000
+        runAsNonRoot: true
+      persistence:
+        enabled: true
+        size: 5Gi
+    auth:
+      database: chatdb
+      username: chat
+      password: chat
+
+
+redis:
+  enabled: true
+  image:
+    registry: docker.io
+    repository: redis
+    tag: 7-alpine
+    pullPolicy: IfNotPresent
+  master:
+    podSecurityContext:
+      fsGroup: 1000
+    containerSecurityContext:
+      runAsUser: 1000
+      runAsNonRoot: true
+    persistence:
+      enabled: false  # для простоты отключим persistence
+  auth:
+    enabled: false

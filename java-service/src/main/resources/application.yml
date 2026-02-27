@@ -1,0 +1,31 @@
+spring:
+  application:
+    name: chat-service
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/chatdb}
+    username: ${DB_USER:chat}
+    password: ${DB_PASSWORD:chat}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.yaml
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+
+server:
+  port: ${PORT:8081}
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:please-change-this-secret-in-production-min-32-chars}
+    expiration-ms: ${JWT_EXPIRATION_MS:86400000}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
