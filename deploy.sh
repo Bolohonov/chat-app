@@ -111,8 +111,6 @@ helm upgrade --install $APP \$CHART \
   --set chatService.image.tag=$TAG \
   --set gateway.image.tag=$TAG \
   --set frontend.image.tag=$TAG \
-  --wait \
-  --timeout 5m
 
 echo "[server] Checking rollout..."
 kubectl rollout status deployment/$APP-service
