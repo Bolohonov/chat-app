@@ -50,8 +50,13 @@ ingress:
 
 postgresql:
   enabled: false
+  host: "172.17.0.1"
+  port: 5432
+  username: "chat"
   password: "4i3w262R/66BVQA3+KlZAw=="
 
 redis:
-  password: "Fs9UkCE6rfT2Bq6vtzZ0nQ=="
   enabled: false
+  host: "172.17.0.1"
+  port: 6379
+  password: "Fs9UkCE6rfT2Bq6vtzZ0nQ=="

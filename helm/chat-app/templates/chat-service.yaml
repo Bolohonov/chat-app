@@ -24,7 +24,7 @@ spec:
             - name: PORT
               value: "{{ .Values.chatService.service.port }}"
             - name: DB_URL
-              value: "jdbc:postgresql://{{ include "chat-app.fullname" . }}-postgresql:5432/chatdb"
+              value: "jdbc:postgresql://{{ .Values.postgresql.host }}:{{ .Values.postgresql.port }}/{{ .Values.postgresql.database }}"
             - name: DB_USER
               value: {{ .Values.postgresql.username | quote }}
             - name: DB_PASSWORD
@@ -33,7 +33,9 @@ spec:
                   name: {{ include "chat-app.fullname" . }}-secrets
                   key: db-password
             - name: REDIS_HOST
-              value: {{ include "chat-app.fullname" . | printf "%s-redis-master" | quote }}
+              value: {{ .Values.redis.host | quote }}
+            - name: REDIS_PORT
+              value: "{{ .Values.redis.port }}"
             - name: REDIS_PASSWORD
               valueFrom:
                 secretKeyRef:
