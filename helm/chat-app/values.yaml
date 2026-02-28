@@ -44,6 +44,7 @@ ingress:
   enabled: true
   className: nginx
   host: chat.local
+  basePath: ""
   tls:
     enabled: false
     secretName: chat-tls
