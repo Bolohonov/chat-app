@@ -54,14 +54,14 @@ spec:
             httpGet:
               path: /actuator/health
               port: {{ .Values.chatService.service.port }}
-            initialDelaySeconds: 600
+            initialDelaySeconds: 480
             periodSeconds: 30
             failureThreshold: 5
           readinessProbe:
             httpGet:
               path: /actuator/health
               port: {{ .Values.chatService.service.port }}
-            initialDelaySeconds: 600
+            initialDelaySeconds: 420
             periodSeconds: 10
             failureThreshold: 10
 ---
