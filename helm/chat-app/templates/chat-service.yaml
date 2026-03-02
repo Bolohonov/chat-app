@@ -66,7 +66,7 @@ spec:
             httpGet:
               path: /actuator/health/liveness
               port: {{ .Values.chatService.service.port }}
-            initialDelaySeconds: 420
+            initialDelaySeconds: 360
             periodSeconds: 30
             timeoutSeconds: 5
             failureThreshold: 5
@@ -74,7 +74,7 @@ spec:
             httpGet:
               path: /actuator/health/readiness
               port: {{ .Values.chatService.service.port }}
-            initialDelaySeconds: 360
+            initialDelaySeconds: 300
             periodSeconds: 10
             timeoutSeconds: 5
             failureThreshold: 10
