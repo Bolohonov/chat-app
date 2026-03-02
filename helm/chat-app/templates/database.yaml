@@ -36,8 +36,8 @@ spec:
             - name: POSTGRES_DB
               value: {{ .Values.postgresql.database | quote }}
             - name: POSTGRES_USER
-              value: chat
-            - name: {{ .Values.postgresql.username | quote }}
+              value: {{ .Values.postgresql.username | quote }}
+            - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: {{ include "chat-app.fullname" . }}-secrets
@@ -47,9 +47,14 @@ spec:
               mountPath: /var/lib/postgresql/data
           readinessProbe:
             exec:
-              command: ["sh", "-c", "redis-cli -a $REDIS_PASSWORD ping"]
+              command: ["pg_isready", "-U", "{{ .Values.postgresql.username }}"]
             initialDelaySeconds: 10
             periodSeconds: 5
+          livenessProbe:
+            exec:
+              command: ["pg_isready", "-U", "{{ .Values.postgresql.username }}"]
+            initialDelaySeconds: 30
+            periodSeconds: 10
       volumes:
         - name: pgdata
           persistentVolumeClaim:
@@ -101,9 +106,20 @@ spec:
                   key: redis-password
           readinessProbe:
             exec:
-              command: ["redis-cli", "-a", "$(REDIS_PASSWORD)", "ping"]
+              command:
+                - sh
+                - -c
+                - redis-cli -a "$REDIS_PASSWORD" ping
             initialDelaySeconds: 5
             periodSeconds: 5
+          livenessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - redis-cli -a "$REDIS_PASSWORD" ping
+            initialDelaySeconds: 15
+            periodSeconds: 10
 ---
 apiVersion: v1
 kind: Service
