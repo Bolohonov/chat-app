@@ -55,7 +55,7 @@ spec:
             - name: MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE
               value: "health,info,metrics,env,beans"
             - name: MANAGEMENT_ENDPOINT_HEALTH_GROUP_READINESS_INCLUDE
-              value: "db,redis,diskSpace"
+              value: "db,diskSpace"
             - name: MANAGEMENT_ENDPOINT_HEALTH_GROUP_LIVENESS_INCLUDE
               value: "ping,diskSpace"
           resources:
