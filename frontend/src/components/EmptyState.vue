@@ -7,8 +7,8 @@
       </span>
       <span class="bracket">]</span>
     </div>
-    <div class="empty-title">SELECT A ROOM</div>
-    <div class="empty-sub">Choose a room from the sidebar<br>or create a new one to start chatting</div>
+    <div class="empty-title">ВЫБОР КОМНАТЫ</div>
+    <div class="empty-sub">Выберите комнату в меню<br>или создайте новую для начала общения</div>
   </div>
 </template>
 

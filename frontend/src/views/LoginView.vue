@@ -21,26 +21,26 @@
       <!-- Form -->
       <form class="form" @submit.prevent="submit">
         <div v-if="mode === 'register'" class="field" style="animation-delay:0s">
-          <label>display_name</label>
-          <input v-model="form.displayName" placeholder="How others see you" autocomplete="off"/>
+          <label>отображаемое_имя</label>
+          <input v-model="form.displayName" placeholder="Как другие будут вас видеть" autocomplete="off"/>
         </div>
         <div class="field" :style="{ animationDelay: mode === 'register' ? '0.05s' : '0s' }">
-          <label>username</label>
-          <input v-model="form.username" placeholder="your_handle" autocomplete="username"/>
+          <label>имя</label>
+          <input v-model="form.username" placeholder="Ваше имя" autocomplete="username"/>
         </div>
         <div v-if="mode === 'register'" class="field" style="animation-delay:0.1s">
           <label>email</label>
           <input v-model="form.email" type="email" placeholder="you@domain.com"/>
         </div>
         <div class="field" :style="{ animationDelay: mode === 'register' ? '0.15s' : '0.05s' }">
-          <label>password</label>
+          <label>пароль</label>
           <input v-model="form.password" type="password" placeholder="••••••••" autocomplete="current-password"/>
         </div>
 
         <div v-if="error" class="error">⚠ {{ error }}</div>
 
         <button type="submit" class="btn-submit" :disabled="loading">
-          <span v-if="!loading">{{ mode === 'login' ? 'authenticate_' : 'create_account_' }}</span>
+          <span v-if="!loading">{{ mode === 'login' ? 'аутентификация_' : 'создать_аккаунт_' }}</span>
           <span v-else class="loading-dots">
             <span></span><span></span><span></span>
           </span>
