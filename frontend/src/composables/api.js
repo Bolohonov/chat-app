@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const api = axios.create({ baseURL: '/' })
+const api = axios.create({ baseURL: '/chat' })
 
 api.interceptors.request.use(cfg => {
   const token = localStorage.getItem('token')
