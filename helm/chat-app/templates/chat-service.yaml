@@ -48,21 +48,33 @@ spec:
                   key: jwt-secret
             - name: JWT_EXPIRATION_MS
               value: "{{ .Values.chatService.env.JWT_EXPIRATION_MS }}"
+            - name: MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS
+              value: "always"
+            - name: MANAGEMENT_ENDPOINT_HEALTH_SHOW_COMPONENTS
+              value: "always"
+            - name: MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE
+              value: "health,info,metrics,env,beans"
+            - name: MANAGEMENT_ENDPOINT_HEALTH_GROUP_READINESS_INCLUDE
+              value: "db,redis,diskSpace"
+            - name: MANAGEMENT_ENDPOINT_HEALTH_GROUP_LIVENESS_INCLUDE
+              value: "ping,diskSpace"
           resources:
             {{- toYaml .Values.chatService.resources | nindent 12 }}
           livenessProbe:
             httpGet:
-              path: /actuator/health
+              path: /actuator/health/liveness
               port: {{ .Values.chatService.service.port }}
-            initialDelaySeconds: 480
+            initialDelaySeconds: 420
             periodSeconds: 30
+            timeoutSeconds: 5
             failureThreshold: 5
           readinessProbe:
             httpGet:
-              path: /actuator/health
+              path: /actuator/health/readiness
               port: {{ .Values.chatService.service.port }}
-            initialDelaySeconds: 420
+            initialDelaySeconds: 360
             periodSeconds: 10
+            timeoutSeconds: 5
             failureThreshold: 10
 ---
 apiVersion: v1
