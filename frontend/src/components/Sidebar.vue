@@ -19,13 +19,13 @@
       <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
       </svg>
-      <input v-model="search" class="search-input" placeholder="search rooms..." />
+      <input v-model="search" class="search-input" placeholder="поиск комнат..." />
     </div>
 
     <!-- Rooms header -->
     <div class="section-header">
-      <span class="section-label">rooms</span>
-      <button class="new-room-btn" @click="showNewRoom = true" title="New room">
+      <span class="section-label">комнаты</span>
+      <button class="new-room-btn" @click="showNewRoom = true" title="Новая комната">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
           <path d="M12 5v14M5 12h14"/>
         </svg>
@@ -35,7 +35,7 @@
     <!-- Room list -->
     <div class="rooms-list" v-if="!loading">
       <div v-if="filteredRooms.length === 0" class="empty-rooms">
-        <span>no rooms yet</span>
+        <span>комнат пока нет</span>
       </div>
       <button
           v-for="room in filteredRooms"
@@ -61,9 +61,9 @@
     <Teleport to="body">
       <div v-if="showNewRoom" class="modal-overlay" @click.self="showNewRoom = false">
         <div class="modal">
-          <div class="modal-title">new_room <span class="accent">_</span></div>
-          <input v-model="newRoom.name" class="modal-input" placeholder="room name" maxlength="50" />
-          <input v-model="newRoom.description" class="modal-input" placeholder="description (optional)" maxlength="200" />
+          <div class="modal-title">новая_комната <span class="accent">_</span></div>
+          <input v-model="newRoom.name" class="modal-input" placeholder="название комнаты" maxlength="50" />
+          <input v-model="newRoom.description" class="modal-input" placeholder="описание (не обязательно)" maxlength="200" />
           <div class="modal-type-row">
             <button
                 v-for="t in ['GROUP','DIRECT']"
@@ -73,8 +73,8 @@
             >{{ t.toLowerCase() }}</button>
           </div>
           <div class="modal-actions">
-            <button class="modal-cancel" @click="showNewRoom = false">cancel</button>
-            <button class="modal-create" :disabled="!newRoom.name" @click="createRoom">create_</button>
+            <button class="modal-cancel" @click="showNewRoom = false">выйти</button>
+            <button class="modal-create" :disabled="!newRoom.name" @click="createRoom">создать_</button>
           </div>
         </div>
       </div>

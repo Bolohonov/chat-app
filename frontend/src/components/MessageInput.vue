@@ -23,7 +23,7 @@
       </button>
     </div>
     <div class="input-hint">
-      <kbd>Enter</kbd> to send · <kbd>Shift+Enter</kbd> for newline
+      <kbd>Enter</kbd> для отправки · <kbd>Shift+Enter</kbd> новая строка
     </div>
   </div>
 </template>

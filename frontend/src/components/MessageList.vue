@@ -7,7 +7,7 @@
     <div v-else class="messages-inner">
       <div v-if="grouped.length === 0" class="no-messages">
         <span class="nm-icon">⊞</span>
-        <span>No messages yet. Say hello!</span>
+        <span>Сообщений пока нет. Просто напиши привет!</span>
       </div>
 
       <template v-for="group in grouped" :key="group.date">

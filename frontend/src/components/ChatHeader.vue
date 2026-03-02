@@ -10,7 +10,7 @@
     <div class="header-right">
       <div :class="['ws-badge', { connected: wsConnected }]">
         <span class="ws-dot"></span>
-        <span class="ws-label">{{ wsConnected ? 'live' : 'connecting' }}</span>
+        <span class="ws-label">{{ wsConnected ? 'онлайн' : 'подключение' }}</span>
       </div>
     </div>
   </header>
