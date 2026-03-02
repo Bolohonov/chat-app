@@ -48,6 +48,8 @@ spec:
                   key: jwt-secret
             - name: JWT_EXPIRATION_MS
               value: "{{ .Values.chatService.env.JWT_EXPIRATION_MS }}"
+            - name: MANAGEMENT_SECURITY_ENABLED
+              value: "false"
             - name: MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS
               value: "always"
             - name: MANAGEMENT_ENDPOINT_HEALTH_SHOW_COMPONENTS
