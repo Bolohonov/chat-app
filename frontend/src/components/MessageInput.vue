@@ -5,7 +5,7 @@
           ref="inputEl"
           v-model="text"
           class="msg-input"
-          :placeholder="`message ${rooms.activeRoom?.name || ''}`"
+          :placeholder="`сообщение ${rooms.activeRoom?.name || ''}`"
           rows="1"
           @keydown.enter.exact.prevent="send"
           @keydown="onKeydown"

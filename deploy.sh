@@ -106,21 +106,21 @@ CHART="$REMOTE_BUILD_DIR/helm"
 
 [ ! -f "\$SECRETS" ] && echo "ERROR: values.prod.yaml not found at \$SECRETS" && exit 1
 
+echo "[server] Clearing k3s image cache before deploy..."
+sudo crictl rmi localhost:5000/chat-service:$TAG 2>/dev/null || true
+sudo crictl rmi localhost:5000/chat-gateway:$TAG 2>/dev/null || true
+sudo crictl rmi localhost:5000/chat-frontend:$TAG 2>/dev/null || true
+
 helm upgrade --install $APP \$CHART \
   --values \$SECRETS \
   --set chatService.image.tag=$TAG \
   --set gateway.image.tag=$TAG \
   --set frontend.image.tag=$TAG
 
-echo "[server] Clearing k3s image cache..."
-sudo crictl rmi localhost:5000/chat-service:$TAG 2>/dev/null || true
-sudo crictl rmi localhost:5000/chat-gateway:$TAG 2>/dev/null || true
-sudo crictl rmi localhost:5000/chat-frontend:$TAG 2>/dev/null || true
-
 echo "[server] Restarting deployments..."
-kubectl rollout restart deployment/$APP-service
 kubectl rollout restart deployment/$APP-gateway
 kubectl rollout restart deployment/$APP-frontend
+kubectl rollout restart deployment/$APP-service
 
 echo "[server] Checking rollout..."
 kubectl rollout status deployment/$APP-gateway --timeout=120s
