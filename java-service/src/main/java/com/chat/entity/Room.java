@@ -1,9 +1,9 @@
 package com.chat.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.Instant;
@@ -11,9 +11,9 @@ import java.util.Set;
 
 @Entity
 @Table(name = "rooms")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
-@EqualsAndHashCode(exclude = {"members", "owner"})
 public class Room {
 
     @Id
@@ -40,5 +40,18 @@ public class Room {
 
     public enum RoomType {
         DIRECT, GROUP
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Room)) return false;
+        Room room = (Room) o;
+        return id != null && id.equals(room.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
     }
 }
