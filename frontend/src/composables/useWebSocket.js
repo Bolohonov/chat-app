@@ -34,7 +34,6 @@ export function useWebSocket() {
 
     ws.onclose = () => {
       connected.value = false
-      // Auto-reconnect after 3s
       setTimeout(() => { if (currentRoomId === roomId) connect(roomId) }, 3000)
     }
 
@@ -52,6 +51,9 @@ export function useWebSocket() {
     }
 
     if (msg.type === 'message') {
+      // Skip own messages — they are added optimistically in ChatView.sendMessage()
+      if (msg.userId === auth.userId) return
+
       roomsStore.pushMessage({
         id:          msg.id || Date.now(),
         senderId:    msg.userId,

@@ -5,7 +5,7 @@
           ref="inputEl"
           v-model="text"
           class="msg-input"
-          :placeholder="`сообщение ${rooms.activeRoom?.name || ''}`"
+          :placeholder="`message ${rooms.activeRoom?.name || ''}`"
           rows="1"
           @keydown.enter.exact.prevent="send"
           @keydown="onKeydown"
@@ -23,7 +23,7 @@
       </button>
     </div>
     <div class="input-hint">
-      <kbd>Enter</kbd> для отправки · <kbd>Shift+Enter</kbd> новая строка
+      <kbd>Enter</kbd> отправить · <kbd>Shift+Enter</kbd> новая строка
     </div>
   </div>
 </template>
@@ -36,7 +36,6 @@ const emit  = defineEmits(['send', 'typing'])
 const rooms = useRoomsStore()
 const text  = ref('')
 const inputEl = ref(null)
-
 let typingTimeout = null
 
 function send() {
@@ -49,7 +48,6 @@ function send() {
 
 function onKeydown(e) {
   if (e.key === 'Enter' && e.shiftKey) return
-  // Fire typing event (debounced)
   clearTimeout(typingTimeout)
   emit('typing')
   typingTimeout = setTimeout(() => {}, 2000)
@@ -59,16 +57,18 @@ function autoResize() {
   const el = inputEl.value
   if (!el) return
   el.style.height = 'auto'
-  el.style.height = Math.min(el.scrollHeight, 160) + 'px'
+  el.style.height = Math.min(el.scrollHeight, 120) + 'px'
 }
 </script>
 
 <style scoped>
 .input-area {
   flex-shrink: 0;
-  padding: 12px 20px 16px;
+  padding: 10px 14px 12px;
   border-top: 1px solid var(--border);
   background: var(--bg-deep);
+  /* Safe area for iOS home bar */
+  padding-bottom: max(12px, env(safe-area-inset-bottom));
 }
 .input-wrap {
   display: flex;
@@ -77,7 +77,7 @@ function autoResize() {
   background: var(--bg-surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  padding: 4px 4px 4px 16px;
+  padding: 4px 4px 4px 14px;
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 .input-wrap:focus-within {
@@ -94,11 +94,10 @@ function autoResize() {
   font-size: 14px;
   line-height: 1.5;
   padding: 8px 0;
-  max-height: 160px;
+  max-height: 120px;
   font-family: var(--font-sans);
 }
 .msg-input::placeholder { color: var(--text-ghost); }
-
 .send-btn {
   width: 36px; height: 36px;
   border-radius: var(--radius-md);
@@ -109,11 +108,7 @@ function autoResize() {
   transition: all 0.2s;
   margin-bottom: 2px;
 }
-.send-btn.active {
-  background: var(--accent);
-  color: var(--bg-void);
-  animation: glow-pulse 2s ease-in-out infinite;
-}
+.send-btn.active { background: var(--accent); color: var(--bg-void); animation: glow-pulse 2s ease-in-out infinite; }
 .send-btn:disabled { cursor: not-allowed; }
 
 .input-hint {
@@ -121,7 +116,7 @@ function autoResize() {
   font-size: 10px;
   color: var(--text-ghost);
   text-align: center;
-  margin-top: 8px;
+  margin-top: 6px;
   letter-spacing: 0.5px;
 }
 kbd {
@@ -132,5 +127,11 @@ kbd {
   font-family: var(--font-mono);
   font-size: 9px;
   color: var(--text-muted);
+}
+
+/* Mobile: hide keyboard hint to save space */
+@media (max-width: 767px) {
+  .input-hint { display: none; }
+  .input-area { padding: 8px 10px max(10px, env(safe-area-inset-bottom)); }
 }
 </style>

@@ -32,14 +32,21 @@ public class RoomService {
         room.setDescription(req.description());
         room.setType(req.type() != null ? req.type() : Room.RoomType.GROUP);
         room.setOwner(owner);
+        roomRepository.save(room);
 
+        // Fix: add room via User side (owning side of @ManyToMany)
         Set<User> members = new HashSet<>();
         members.add(owner);
         if (req.memberIds() != null) {
             members.addAll(userRepository.findAllById(req.memberIds()));
         }
-        room.setMembers(members);
-        roomRepository.save(room);
+        for (User member : members) {
+            if (member.getRooms() == null) {
+                member.setRooms(new HashSet<>());
+            }
+            member.getRooms().add(room);
+            userRepository.save(member);
+        }
 
         return toDto(room);
     }
@@ -57,8 +64,13 @@ public class RoomService {
                 .orElseThrow(() -> new IllegalArgumentException("Room not found"));
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
-        room.getMembers().add(user);
-        roomRepository.save(room);
+
+        // Fix: add via User side
+        if (user.getRooms() == null) {
+            user.setRooms(new HashSet<>());
+        }
+        user.getRooms().add(room);
+        userRepository.save(user);
     }
 
     private RoomDto toDto(Room r) {

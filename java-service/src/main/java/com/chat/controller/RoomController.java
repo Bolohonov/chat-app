@@ -34,6 +34,14 @@ public class RoomController {
         return ResponseEntity.ok(roomService.getUserRooms(userId));
     }
 
+    @DeleteMapping("/{roomId}")
+    public ResponseEntity<Void> deleteRoom(
+            @PathVariable String roomId,
+            @AuthenticationPrincipal String userId) {
+        roomService.deleteRoom(roomId, userId);
+        return ResponseEntity.noContent().build();
+    }
+
     @PostMapping("/{roomId}/members/{userId}")
     public ResponseEntity<Void> addMember(
             @PathVariable String roomId,
