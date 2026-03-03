@@ -23,10 +23,10 @@ public class AuthService {
     @Transactional
     public AuthResponse register(RegisterRequest req) {
         if (userRepository.existsByUsername(req.username())) {
-            throw new IllegalArgumentException("Username already taken");
+            throw new IllegalArgumentException("Указанное имя пользователя уже существует!");
         }
         if (userRepository.existsByEmail(req.email())) {
-            throw new IllegalArgumentException("Email already registered");
+            throw new IllegalArgumentException("Указанный email уже зарегистрирован!");
         }
 
         User user = new User();
