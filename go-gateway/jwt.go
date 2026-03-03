@@ -6,7 +6,12 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-func validateJWT(tokenStr string, secret string) (string, error) {
+type JWTClaims struct {
+	UserID      string
+	DisplayName string
+}
+
+func validateJWTClaims(tokenStr string, secret string) (*JWTClaims, error) {
 	token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method")
@@ -14,15 +19,22 @@ func validateJWT(tokenStr string, secret string) (string, error) {
 		return []byte(secret), nil
 	})
 	if err != nil || !token.Valid {
-		return "", fmt.Errorf("invalid token")
+		return nil, fmt.Errorf("invalid token")
 	}
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok {
-		return "", fmt.Errorf("invalid claims")
+		return nil, fmt.Errorf("invalid claims")
 	}
 	sub, ok := claims["sub"].(string)
 	if !ok {
-		return "", fmt.Errorf("missing sub claim")
+		return nil, fmt.Errorf("missing sub claim")
 	}
-	return sub, nil
+	displayName, _ := claims["displayName"].(string)
+	if displayName == "" {
+		displayName = sub
+	}
+	return &JWTClaims{
+		UserID:      sub,
+		DisplayName: displayName,
+	}, nil
 }

@@ -2,6 +2,10 @@
   <div class="input-area">
     <div class="input-wrap">
       <textarea
+          autocomplete="off"
+          autocorrect="off"
+          autocapitalize="off"
+          spellcheck="false"
           ref="inputEl"
           v-model="text"
           class="msg-input"

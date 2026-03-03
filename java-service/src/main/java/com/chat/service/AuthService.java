@@ -36,7 +36,7 @@ public class AuthService {
         user.setDisplayName(req.displayName() != null ? req.displayName() : req.username());
         userRepository.save(user);
 
-        String token = jwtService.generateToken(user.getId(), user.getUsername());
+        String token = jwtService.generateToken(user.getId(), user.getUsername(), user.getDisplayName());
         return new AuthResponse(token, user.getId(), user.getUsername(), user.getDisplayName());
     }
 
@@ -48,7 +48,7 @@ public class AuthService {
             throw new BadCredentialsException("Invalid credentials");
         }
 
-        String token = jwtService.generateToken(user.getId(), user.getUsername());
+        String token = jwtService.generateToken(user.getId(), user.getUsername(), user.getDisplayName());
         return new AuthResponse(token, user.getId(), user.getUsername(), user.getDisplayName());
     }
 }

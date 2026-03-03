@@ -1,17 +1,19 @@
 package com.chat.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.Instant;
 
 @Entity
 @Table(name = "messages", indexes = {
-    @Index(name = "idx_messages_room_created", columnList = "room_id, created_at DESC")
+        @Index(name = "idx_messages_room_created", columnList = "room_id, created_at DESC")
 })
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 public class Message {
 
@@ -34,4 +36,17 @@ public class Message {
     private Instant createdAt;
 
     private boolean deleted = false;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Message)) return false;
+        Message m = (Message) o;
+        return id != null && id.equals(m.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
 }

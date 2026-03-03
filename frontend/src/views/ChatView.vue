@@ -1,13 +1,11 @@
 <template>
   <div class="chat-shell">
-    <!-- Sidebar: on mobile shown only when no active room OR when explicitly opened -->
     <Sidebar
         ref="sidebarRef"
         :class="['sidebar-panel', { 'mobile-hidden': isMobile && rooms.activeRoom && !showSidebar }]"
         @room-selected="onRoomSelected"
     />
 
-    <!-- Main chat area -->
     <div
         class="chat-main"
         :class="{ 'mobile-hidden': isMobile && !rooms.activeRoom && !showSidebar }"
@@ -16,13 +14,18 @@
         <ChatHeader
             @add-user="openAddUserSearch"
             @back="goBack"
+            @toggle-members="showMembers = !showMembers"
             :show-back="isMobile"
+            :show-members="showMembers"
+            :member-count="roomMembers.length"
         />
         <MessageList :typing-users="typingUsers" />
         <MessageInput @send="sendMessage" @typing="ws.sendTyping()" />
       </template>
       <EmptyState v-else />
     </div>
+
+    <MembersPanel v-model="showMembers" :members="roomMembers" />
 
     <!-- Add user search modal -->
     <Teleport to="body">
@@ -71,21 +74,23 @@ import ChatHeader from '@/components/ChatHeader.vue'
 import MessageList from '@/components/MessageList.vue'
 import MessageInput from '@/components/MessageInput.vue'
 import EmptyState from '@/components/EmptyState.vue'
+import MembersPanel from '@/components/MembersPanel.vue'
 
 const rooms = useRoomsStore()
 const auth  = useAuthStore()
 const ws    = useWebSocket()
-const { typingUsers } = ws
+const { typingUsers, roomMembers } = ws
 
-const sidebarRef     = ref(null)
-const showSidebar    = ref(false)
-const windowWidth    = ref(window.innerWidth)
-const isMobile       = computed(() => windowWidth.value < 768)
+const sidebarRef  = ref(null)
+const showSidebar = ref(false)
+const showMembers = ref(false)
+const windowWidth = ref(window.innerWidth)
+const isMobile    = computed(() => windowWidth.value < 768)
 
-const showUserSearch     = ref(false)
-const userSearchQuery    = ref('')
-const userSearchLoading  = ref(false)
-const userSearchResults  = ref([])
+const showUserSearch    = ref(false)
+const userSearchQuery   = ref('')
+const userSearchLoading = ref(false)
+const userSearchResults = ref([])
 let userSearchTimer = null
 
 function onResize() { windowWidth.value = window.innerWidth }
@@ -94,13 +99,14 @@ onUnmounted(() => window.removeEventListener('resize', onResize))
 
 function onRoomSelected(room) {
   ws.connect(room.id)
-  showSidebar.value = false  // on mobile: hide sidebar, show chat
+  showSidebar.value = false
+  showMembers.value = false
 }
 
 function goBack() {
-  // On mobile: back button returns to room list
   rooms.activeRoom = null
   showSidebar.value = false
+  showMembers.value = false
 }
 
 function sendMessage(content) {
@@ -147,7 +153,7 @@ function pickUser(user) {
 <style scoped>
 .chat-shell {
   display: flex;
-  height: 100dvh; /* dynamic viewport height — fixes mobile browser chrome */
+  height: 100dvh;
   background: var(--bg-void);
   overflow: hidden;
 }
@@ -160,7 +166,6 @@ function pickUser(user) {
   background: var(--bg-deep);
 }
 
-/* ── Mobile ── */
 @media (max-width: 767px) {
   .sidebar-panel {
     width: 100% !important;
@@ -168,19 +173,16 @@ function pickUser(user) {
     inset: 0;
     z-index: 10;
   }
-
   .chat-main {
     position: absolute;
     inset: 0;
     width: 100%;
   }
-
   .mobile-hidden {
     display: none !important;
   }
 }
 
-/* Modals */
 .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center; z-index: 100; padding: 16px; }
 .modal { background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-xl); padding: 28px 24px; width: 100%; max-width: 360px; box-shadow: var(--shadow-deep); }
 .modal-title { font-family: var(--font-mono); font-size: 15px; font-weight: 700; color: var(--text-primary); margin-bottom: 16px; }

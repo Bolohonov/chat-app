@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"log"
 	"sync"
+	"time"
 )
 
-// Hub maintains the set of active clients organized by room
 type Hub struct {
 	rooms      map[string]map[*Client]bool
 	broadcast  chan *Message
@@ -17,11 +17,13 @@ type Hub struct {
 }
 
 type Message struct {
-	RoomID  string `json:"roomId"`
-	UserID  string `json:"userId"`
-	Content string `json:"content"`
-	Type    string `json:"type"`
-	Token   string `json:"-"` // не сериализуется наружу
+	RoomID     string `json:"roomId"`
+	UserID     string `json:"userId"`
+	SenderName string `json:"senderName,omitempty"`
+	Content    string `json:"content"`
+	Type       string `json:"type"`
+	CreatedAt  string `json:"createdAt,omitempty"`
+	Token      string `json:"-"`
 }
 
 func NewHub(chatClient *ChatClient) *Hub {
@@ -34,6 +36,29 @@ func NewHub(chatClient *ChatClient) *Hub {
 	}
 }
 
+func (h *Hub) broadcastMembers(roomID string) {
+	h.mu.RLock()
+	var members []map[string]string
+	for client := range h.rooms[roomID] {
+		members = append(members, map[string]string{
+			"userId":      client.userID,
+			"displayName": client.displayName,
+		})
+	}
+	data, _ := json.Marshal(map[string]interface{}{
+		"type":    "members",
+		"roomId":  roomID,
+		"members": members,
+	})
+	for client := range h.rooms[roomID] {
+		select {
+		case client.send <- data:
+		default:
+		}
+	}
+	h.mu.RUnlock()
+}
+
 func (h *Hub) Run() {
 	for {
 		select {
@@ -44,14 +69,8 @@ func (h *Hub) Run() {
 			}
 			h.rooms[client.roomID][client] = true
 			h.mu.Unlock()
-
-			h.broadcast <- &Message{
-				RoomID:  client.roomID,
-				UserID:  client.userID,
-				Type:    "join",
-				Content: client.userID + " joined",
-			}
-			log.Printf("Client %s joined room %s", client.userID, client.roomID)
+			log.Printf("Client %s (%s) joined room %s", client.userID, client.displayName, client.roomID)
+			h.broadcastMembers(client.roomID)
 
 		case client := <-h.unregister:
 			h.mu.Lock()
@@ -65,25 +84,18 @@ func (h *Hub) Run() {
 				}
 			}
 			h.mu.Unlock()
-
-			h.broadcast <- &Message{
-				RoomID:  client.roomID,
-				UserID:  client.userID,
-				Type:    "leave",
-				Content: client.userID + " left",
-			}
 			log.Printf("Client %s left room %s", client.userID, client.roomID)
+			h.broadcastMembers(client.roomID)
 
 		case msg := <-h.broadcast:
-			// Сохраняем в chat-service только обычные сообщения
 			if msg.Type == "message" {
+				msg.CreatedAt = time.Now().UTC().Format(time.RFC3339)
 				go func(m *Message) {
 					if err := h.chatClient.SaveMessage(m); err != nil {
 						log.Printf("Failed to save message from %s: %v", m.UserID, err)
 					}
 				}(msg)
 			}
-
 			h.mu.RLock()
 			clients := h.rooms[msg.RoomID]
 			data, _ := json.Marshal(msg)
@@ -91,7 +103,6 @@ func (h *Hub) Run() {
 				select {
 				case client.send <- data:
 				default:
-					// Slow client - drop and close
 					close(client.send)
 					delete(clients, client)
 				}
