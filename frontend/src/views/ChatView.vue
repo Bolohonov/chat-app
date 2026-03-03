@@ -17,7 +17,7 @@
             @toggle-members="showMembers = !showMembers"
             :show-back="isMobile"
             :show-members="showMembers"
-            :member-count="roomMembers.length"
+            :member-count="roomMembers?.length ?? 0"
         />
         <MessageList :typing-users="typingUsers" />
         <MessageInput @send="sendMessage" @typing="ws.sendTyping()" />

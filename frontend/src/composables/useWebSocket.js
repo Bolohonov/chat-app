@@ -9,12 +9,14 @@ export function useWebSocket() {
   let ws = null
   const connected   = ref(false)
   const typingUsers = ref(new Set())
+  const roomMembers = ref([])
   let typingTimer   = null
   let currentRoomId = null
 
   function connect(roomId) {
     disconnect()
     currentRoomId = roomId
+    roomMembers.value = []
 
     const proto = location.protocol === 'https:' ? 'wss' : 'ws'
     const url = `${proto}://${location.host}/ws/${roomId}?token=${auth.token}`
@@ -25,15 +27,13 @@ export function useWebSocket() {
     ws.onmessage = (e) => {
       const lines = e.data.trim().split('\n')
       for (const line of lines) {
-        try {
-          const msg = JSON.parse(line)
-          handleMessage(msg)
-        } catch {}
+        try { handleMessage(JSON.parse(line)) } catch {}
       }
     }
 
     ws.onclose = () => {
       connected.value = false
+      roomMembers.value = []
       setTimeout(() => { if (currentRoomId === roomId) connect(roomId) }, 3000)
     }
 
@@ -43,24 +43,27 @@ export function useWebSocket() {
   function handleMessage(msg) {
     if (msg.type === 'typing') {
       if (msg.userId !== auth.userId) {
-        typingUsers.value.add(msg.userId)
+        typingUsers.value = new Set([...typingUsers.value, msg.userId])
         clearTimeout(typingTimer)
-        typingTimer = setTimeout(() => typingUsers.value.clear(), 3000)
+        typingTimer = setTimeout(() => { typingUsers.value = new Set() }, 3000)
       }
       return
     }
 
-    if (msg.type === 'message') {
-      // Skip own messages — they are added optimistically in ChatView.sendMessage()
-      if (msg.userId === auth.userId) return
+    if (msg.type === 'members') {
+      roomMembers.value = msg.members || []
+      return
+    }
 
+    if (msg.type === 'message') {
+      if (msg.userId === auth.userId) return
       roomsStore.pushMessage({
-        id:          msg.id || Date.now(),
-        senderId:    msg.userId,
-        senderName:  msg.senderName || msg.userId,
-        content:     msg.content,
-        createdAt:   msg.createdAt || new Date().toISOString(),
-        roomId:      msg.roomId
+        id:         msg.id || Date.now(),
+        senderId:   msg.userId,
+        senderName: msg.senderName || msg.userId,
+        content:    msg.content,
+        createdAt:  msg.createdAt || new Date().toISOString(),
+        roomId:     msg.roomId
       })
       roomsStore.updateRoomLastMessage(msg.roomId, msg.content)
     }
@@ -80,12 +83,13 @@ export function useWebSocket() {
 
   function disconnect() {
     currentRoomId = null
+    roomMembers.value = []
     if (ws) { ws.onclose = null; ws.close(); ws = null }
     connected.value = false
-    typingUsers.value.clear()
+    typingUsers.value = new Set()
   }
 
   onUnmounted(disconnect)
 
-  return { connected, typingUsers, connect, send, sendTyping, disconnect }
+  return { connected, typingUsers, roomMembers, connect, send, sendTyping, disconnect }
 }
