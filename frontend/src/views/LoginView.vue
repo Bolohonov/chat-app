@@ -67,18 +67,26 @@ watch(mode, () => { error.value = ''; Object.assign(form, { username:'', passwor
 
 async function submit() {
   error.value = ''
-  if (!form.username || !form.password) { error.value = 'Fill all required fields'; return }
+
+  if (!form.username || !form.password) { error.value = 'Заполните все обязательные поля'; return }
+  if (form.username.length < 3 || form.username.length > 30) { error.value = 'Имя пользователя — от 3 до 30 символов'; return }
+  if (form.password.length < 6) { error.value = 'Пароль — минимум 6 символов'; return }
+
+  if (mode.value === 'register') {
+    if (!form.email) { error.value = 'Email обязателен'; return }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) { error.value = 'Некорректный email'; return }
+  }
+
   loading.value = true
   try {
     if (mode.value === 'login') {
       await auth.login({ username: form.username, password: form.password })
     } else {
-      if (!form.email) { error.value = 'Email is required'; return }
       await auth.register({ username: form.username, password: form.password, email: form.email, displayName: form.displayName || form.username })
     }
     router.push('/')
   } catch (e) {
-    error.value = e.response?.data?.message || e.response?.data || 'Authentication failed'
+    error.value = e.response?.data?.message || e.response?.data || 'Ошибка аутентификации'
   } finally {
     loading.value = false
   }

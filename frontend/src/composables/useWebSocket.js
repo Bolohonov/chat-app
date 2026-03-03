@@ -43,7 +43,8 @@ export function useWebSocket() {
   function handleMessage(msg) {
     if (msg.type === 'typing') {
       if (msg.userId !== auth.userId) {
-        typingUsers.value = new Set([...typingUsers.value, msg.userId])
+        const name = msg.senderName || msg.userId
+        typingUsers.value = new Set([...typingUsers.value, name])
         clearTimeout(typingTimer)
         typingTimer = setTimeout(() => { typingUsers.value = new Set() }, 3000)
       }
