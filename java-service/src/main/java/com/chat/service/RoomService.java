@@ -7,8 +7,10 @@ import com.chat.entity.User;
 import com.chat.repository.RoomRepository;
 import com.chat.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.HashSet;
 import java.util.List;
@@ -34,16 +36,13 @@ public class RoomService {
         room.setOwner(owner);
         roomRepository.save(room);
 
-        // Fix: add room via User side (owning side of @ManyToMany)
         Set<User> members = new HashSet<>();
         members.add(owner);
         if (req.memberIds() != null) {
             members.addAll(userRepository.findAllById(req.memberIds()));
         }
         for (User member : members) {
-            if (member.getRooms() == null) {
-                member.setRooms(new HashSet<>());
-            }
+            if (member.getRooms() == null) member.setRooms(new HashSet<>());
             member.getRooms().add(room);
             userRepository.save(member);
         }
@@ -65,12 +64,27 @@ public class RoomService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-        // Fix: add via User side
-        if (user.getRooms() == null) {
-            user.setRooms(new HashSet<>());
-        }
+        if (user.getRooms() == null) user.setRooms(new HashSet<>());
         user.getRooms().add(room);
         userRepository.save(user);
+    }
+
+    @Transactional
+    public void deleteRoom(String roomId, String requesterId) {
+        Room room = roomRepository.findById(roomId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Room not found"));
+
+        if (!room.getOwner().getId().equals(requesterId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only the owner can delete this room");
+        }
+
+        List<User> members = userRepository.findMembersByRoomId(roomId);
+        for (User member : members) {
+            member.getRooms().removeIf(r -> r.getId().equals(roomId));
+            userRepository.save(member);
+        }
+
+        roomRepository.deleteById(roomId);
     }
 
     private RoomDto toDto(Room r) {
