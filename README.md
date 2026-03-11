@@ -1,6 +1,7 @@
 # Chat App — Real-time Messaging
 
-Пет-проект: мессенджер с WebSocket (Go) + REST API (Java/Spring Boot), развёрнутый в Kubernetes через Helm.
+Пет-проект: мессенджер с WebSocket (Go) + REST API (Java/Spring Boot), развёрнутый в Kubernetes через Helm.  
+**Live demo:** [bolohonovma.online/chat](https://bolohonovma.online/chat)
 
 ## Архитектура
 
